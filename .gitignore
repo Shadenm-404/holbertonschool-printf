@@ -1,0 +1,4 @@
+/tests/
+/*.o
+/printf_test
+/a.out
