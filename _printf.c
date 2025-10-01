@@ -1,64 +1,78 @@
 #include "main.h"
 
 /**
+ * print_string - prints a string (handles NULL)
+ * @s: string to print
+ * Return: number of characters printed
+ */
+static int print_string(char *s)
+{
+	int n = 0;
+
+	if (s == NULL)
+		s = "(null)";
+
+	while (*s)
+	{
+		n += _putchar(*s);
+		s++;
+	}
+	return (n);
+}
+
+/**
+ * handle_specifier - handles a single conversion specifier
+ * @sp: specifier character
+ * @ap: pointer to va_list
+ * Return: number of characters printed
+ */
+static int handle_specifier(char sp, va_list *ap)
+{
+	if (sp == 'c')
+		return (_putchar(va_arg(*ap, int)));
+	if (sp == 's')
+		return (print_string(va_arg(*ap, char *)));
+	if (sp == '%')
+		return (_putchar('%'));
+
+	/* Unknown specifier: print it verbatim like "%x" -> "%x" */
+	_putchar('%');
+	return (_putchar(sp));
+}
+
+/**
  * _printf - produces output according to a format
- * @format: character string with format specifiers
+ * @format: format string with specifiers
  *
  * Return: number of characters printed, or -1 on error
  */
 int _printf(const char *format, ...)
 {
-    va_list args;
-    int i = 0, count = 0;
-    char *str;
+	va_list ap;
+	int i = 0, count = 0;
 
-    if (format == NULL)
-	return (-1);
-
-    va_start(args, format);
-
-    while (format[i] != '\0')
-    {
-	if (format[i] == '%')
-	{
-	    i++;
-	    if (format[i] == '\0')
-	    {
-		va_end(args);
+	if (format == NULL)
 		return (-1);
-	    }
-	    if (format[i] == 'c')
-	    {
-		count += _putchar(va_arg(args, int));
-	    }
-	    else if (format[i] == 's')
-	    {
-		str = va_arg(args, char *);
-		if (str == NULL)
-		    str = "(null)";
-		while (*str)
-		{
-		    count += _putchar(*str);
-		    str++;
-		}
-	    }
-	    else if (format[i] == '%')
-	    {
-		count += _putchar('%');
-	    }
-	    else
-	    {
-		count += _putchar('%');
-		count += _putchar(format[i]);
-	    }
-	}
-	else
-	{
-	    count += _putchar(format[i]);
-	}
-	i++;
-    }
 
-    va_end(args);
-    return (count);
+	va_start(ap, format);
+	while (format[i] != '\0')
+	{
+		if (format[i] == '%')
+		{
+			i++;
+			if (format[i] == '\0')
+			{
+				va_end(ap);
+				return (-1);
+			}
+			count += handle_specifier(format[i], &ap);
+		}
+		else
+		{
+			count += _putchar(format[i]);
+		}
+		i++;
+	}
+	va_end(ap);
+	return (count);
 }
