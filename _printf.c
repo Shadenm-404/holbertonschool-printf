@@ -35,7 +35,7 @@ static int handle_specifier(char sp, va_list *ap)
 	if (sp == '%')
 		return (_putchar('%'));
 
-	/* Unknown specifier: print it verbatim like "%x" -> "%x" */
+	/* Unknown specifier: print literally */
 	_putchar('%');
 	return (_putchar(sp));
 }
@@ -73,6 +73,6 @@ int _printf(const char *format, ...)
 		}
 		i++;
 	}
-	va_end(ap);
+		va_end(ap);
 	return (count);
 }
