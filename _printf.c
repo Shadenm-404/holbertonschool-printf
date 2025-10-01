@@ -11,7 +11,6 @@ static int print_string(char *s)
 
 	if (s == NULL)
 		s = "(null)";
-
 	while (*s)
 	{
 		n += _putchar(*s);
@@ -21,7 +20,7 @@ static int print_string(char *s)
 }
 
 /**
- * handle_specifier - handles a single conversion specifier
+ * handle_specifier - handles one conversion specifier
  * @sp: specifier character
  * @ap: pointer to va_list
  * Return: number of characters printed
@@ -35,14 +34,14 @@ static int handle_specifier(char sp, va_list *ap)
 	if (sp == '%')
 		return (_putchar('%'));
 
-	/* Unknown -> print literally as printf commonly does: "%!" */
+	/* Unknown -> print literally, e.g. "%!" */
 	_putchar('%');
 	return (_putchar(sp));
 }
 
 /**
  * _printf - produces output according to a format
- * @format: format string with specifiers
+ * @format: format string
  *
  * Return: number of characters printed, or -1 on error
  */
