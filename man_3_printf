@@ -1,0 +1,77 @@
+.TH _PRINTF 3 "October 2025" "holbertonschool-printf" "Library Functions Manual"
+.SH NAME
+_printf \- formatted output conversion to standard output
+.SH SYNOPSIS
+.nf
+#include "main.h"
+
+int _printf(const char *format, ...);
+.fi
+.SH DESCRIPTION
+.B _printf()
+writes output to the standard output stream (stdout) under control of a
+format string that specifies how subsequent arguments are converted for
+output.
+
+Supported conversion specifiers in this implementation:
+.TP
+.B %c
+Print a single character (argument promoted to
+.BR int ).
+.TP
+.B %s
+Print a C string. If the pointer is
+.B NULL ,
+prints the literal
+.BR "(null)" .
+.TP
+.B %d , %i
+Print a signed decimal integer (base 10).
+.TP
+.B %%
+Print a literal percent sign.
+
+If an unknown specifier follows
+.B %
+(e.g. \fB%!\fR), this implementation prints
+.B %
+followed by that character (verbatim).
+
+A trailing solitary
+.B %
+at the end of the format string is considered an error.
+
+This implementation does
+.B not
+handle flags, field width, precision, length modifiers, or buffered output.
+.SH RETURN VALUE
+On success, returns the number of characters written.
+On error (e.g. \fIformat\fR is \fBNULL\fR, or the format ends with a lone \fB%\fR),
+.B -1
+is returned.
+.SH EXAMPLES
+.nf
+_printf("Hello\\n");                 /* prints: Hello\n */
+_printf("Char: %c\\n", 'A');         /* prints: Char: A\n */
+_printf("Str: %s\\n", "Hi");         /* prints: Str: Hi\n */
+_printf("Num: %d %i\\n", 42, -7);    /* prints: Num: 42 -7\n */
+_printf("Percent: %%\\n");           /* prints: Percent: %\n */
+_printf("%!\\n");                    /* prints: %!\\n */
+.fi
+.SH ERRORS
+This simplified implementation reports
+.B -1
+for invalid input as described in
+.B RETURN VALUE
+. It does not reproduce all error cases of the C library
+.BR printf (3) .
+.SH SEE ALSO
+.BR printf (3),
+.BR putchar (3),
+.BR write (2),
+.BR stdarg (3)
+.SH NOTES
+Project constraints: no global variables; at most 5 functions per file;
+compiled with \-Wall \-Werror \-Wextra \-pedantic \-std=gnu89.
+Only the specifiers listed above are supported.
+
