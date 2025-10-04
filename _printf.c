@@ -29,7 +29,11 @@ int _printf(const char *format, ...)
 		if (format[i] == '\0')
 			return (va_end(ap), -1);
 
-		/* print "% " literally unless the final specifier is d/i */
+		/*
+		 * Literal "% ":
+		 * If after '%' there is a space, and the eventual specifier
+		 * (after any spaces/+/#) is NOT 'd' or 'i', print "% " literally.
+		 */
 		if (format[i] == ' ')
 		{
 			int j = i;
@@ -39,12 +43,12 @@ int _printf(const char *format, ...)
 			{
 				count += _putchar('%');
 				count += _putchar(' ');
-				i++; /* consume one space only */
+				i++;
 				continue;
 			}
 		}
 
-		/* parse flags: '+', ' ', '#' */
+		/* flags: '+', ' ', '#' */
 		{
 			int plus = 0, space = 0, hash = 0;
 
