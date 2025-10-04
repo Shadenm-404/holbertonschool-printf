@@ -1,22 +1,15 @@
 #include "main.h"
 
-/**
- * _printf - produces output according to a format
- * @format: format string
- *
- * Return: number of characters printed, or -1 on error
- */
 int _printf(const char *format, ...)
 {
 	va_list ap;
 	int i = 0, count = 0;
-	int plus_flag, space_flag, hash_flag;
 
-	if (!format)
+	if (format == NULL)
 		return (-1);
 
 	va_start(ap, format);
-	while (format[i])
+	while (format[i] != '\0')
 	{
 		if (format[i] != '%')
 		{
@@ -25,79 +18,82 @@ int _printf(const char *format, ...)
 			continue;
 		}
 
-		i++; /* skip % */
-		if (!format[i])
+		i++; /* skip '%' */
+		if (format[i] == '\0')
 			return (va_end(ap), -1);
 
-		/* initialize flags */
-		plus_flag = space_flag = hash_flag = 0;
-
-		/* parse flags */
-		while (format[i] == '+' || format[i] == ' ' || format[i] == '#')
+		/* flags: '+', ' ', '#' — do not consume space unless converter is d/i */
 		{
-			if (format[i] == '+')
-				plus_flag = 1;
-			else if (format[i] == ' ')
-				space_flag = 1;
-			else if (format[i] == '#')
-				hash_flag = 1;
-			i++;
-		}
+			int plus = 0, space = 0, hash = 0, done = 0;
 
-		/* handle specifiers */
-		if (format[i] == 'd' || format[i] == 'i')
-		{
-			int n = va_arg(ap, int);
-
-			if (n >= 0)
+			while (!done)
 			{
-				if (plus_flag)
-					count += _putchar('+');
-				else if (space_flag)
-					count += _putchar(' ');
+				if (format[i] == '+')
+				{
+					plus = 1; i++;
+				}
+				else if (format[i] == '#')
+				{
+					hash = 1; i++;
+				}
+				else if (format[i] == ' ')
+				{
+					int j = i;
+					while (format[j] == ' ')
+						j++;
+					if (format[j] == 'd' || format[j] == 'i')
+					{
+						space = 1; i++;
+					}
+					else
+					{
+						done = 1; /* leave the space to be printed literally below */
+					}
+				}
+				else
+				{
+					done = 1;
+				}
 			}
-			count += print_number(n);
-		}
-		else if (format[i] == 'c')
-			count += _putchar(va_arg(ap, int));
 
-		else if (format[i] == 's')
-			count += print_string(va_arg(ap, char *));
-
-		else if (format[i] == '%')
-			count += _putchar('%');
-
-		else if (format[i] == 'b')
-			count += print_binary(va_arg(ap, unsigned int));
-
-		else if (format[i] == 'p')
-			count += print_pointer(va_arg(ap, void *));
-
-		else if (format[i] == 'x' || format[i] == 'X')
-		{
-			unsigned int n = va_arg(ap, unsigned int);
-			int upper = (format[i] == 'X');
-			if (hash_flag && n != 0)
+			if (format[i] == 'c')
+				count += _putchar(va_arg(ap, int));
+			else if (format[i] == 's')
+				count += print_string(va_arg(ap, char *));
+			else if (format[i] == 'd' || format[i] == 'i')
 			{
-				count += _putchar('0');
-				count += _putchar(upper ? 'X' : 'x');
+				int n = va_arg(ap, int);
+				if (n >= 0)
+				{
+					if (plus) count += _putchar('+');
+					else if (space) count += _putchar(' ');
+				}
+				count += print_number(n);
 			}
-			count += print_hex(n, upper);
-		}
-		else if (format[i] == 'o')
-		{
-			unsigned int n = va_arg(ap, unsigned int);
-			if (hash_flag && n != 0)
-				count += _putchar('0');
-			count += print_octal(n);
-		}
-		else if (format[i] == 'u')
-			count += print_unsigned(va_arg(ap, unsigned int));
-
-		else
-		{
-			count += _putchar('%');
-			count += _putchar(format[i]);
+			else if (format[i] == 'u')
+				count += print_unsigned(va_arg(ap, unsigned int));
+			else if (format[i] == 'o')
+			{
+				unsigned int u = va_arg(ap, unsigned int);
+				count += print_octal(u, hash && u != 0);
+			}
+			else if (format[i] == 'x' || format[i] == 'X')
+			{
+				unsigned int u = va_arg(ap, unsigned int);
+				int upper = (format[i] == 'X');
+				count += print_hex(u, upper, hash && u != 0);
+			}
+			else if (format[i] == 'p')
+				count += print_pointer(va_arg(ap, void *));
+			else if (format[i] == 'b')
+				count += print_binary(va_arg(ap, unsigned int));
+			else if (format[i] == '%')
+				count += _putchar('%');
+			else
+			{
+				count += _putchar('%');
+				count += _putchar(format[i]);
+			}
 		}
 		i++;
 	}
