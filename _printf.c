@@ -3,7 +3,6 @@
 /**
  * _printf - produces output according to a format
  * @format: format string
- *
  * Return: number of characters printed, or -1 on error
  */
 int _printf(const char *format, ...)
@@ -15,6 +14,7 @@ int _printf(const char *format, ...)
 		return (-1);
 
 	va_start(ap, format);
+
 	while (format[i] != '\0')
 	{
 		if (format[i] != '%')
@@ -30,25 +30,37 @@ int _printf(const char *format, ...)
 			return (va_end(ap), -1);
 
 		/*
-		 * Literal "% ":
-		 * If after '%' there is a space, and the eventual specifier
+		 * Fast path for literal "% ":
+		 * If after '%' there is a space and the eventual specifier
 		 * (after any spaces/+/#) is NOT 'd' or 'i', print "% " literally.
+		 * Also handle repeated pattern: "% % % % ".
 		 */
 		if (format[i] == ' ')
 		{
 			int j = i;
 			while (format[j] == ' ' || format[j] == '+' || format[j] == '#')
 				j++;
+
 			if (format[j] != 'd' && format[j] != 'i')
 			{
+				/* print one "% " */
 				count += _putchar('%');
 				count += _putchar(' ');
-				i++;
+				i++; /* consume that one space */
+
+				/* keep consuming " %" pairs */
+				while (format[i] == '%' && format[i + 1] == ' ')
+				{
+					i++; /* now at the space */
+					count += _putchar('%');
+					count += _putchar(' ');
+					i++; /* consume that space */
+				}
 				continue;
 			}
 		}
 
-		/* flags: '+', ' ', '#' */
+		/* parse flags: '+', ' ', '#' */
 		{
 			int plus = 0, space = 0, hash = 0;
 
@@ -116,12 +128,14 @@ int _printf(const char *format, ...)
 			}
 			else
 			{
+				/* unknown specifier: print literally */
 				count += _putchar('%');
 				count += _putchar(format[i]);
 			}
 		}
 		i++;
 	}
+
 	va_end(ap);
 	return (count);
 }
