@@ -18,20 +18,42 @@ int _printf(const char *format, ...)
 			continue;
 		}
 
-		i++;
+		i++; /* skip '%' */
 		if (format[i] == '\0')
 			return (va_end(ap), -1);
 
-		/* flags */
+		/* flags: '+', ' ', '#' — do not consume space unless converter is d/i */
 		{
 			int plus = 0, space = 0, hash = 0, done = 0;
 
 			while (!done)
 			{
-				if (format[i] == '+') { plus = 1; i++; }
-				else if (format[i] == ' ') { space = 1; i++; }
-				else if (format[i] == '#') { hash = 1; i++; }
-				else done = 1;
+				if (format[i] == '+')
+				{
+					plus = 1; i++;
+				}
+				else if (format[i] == '#')
+				{
+					hash = 1; i++;
+				}
+				else if (format[i] == ' ')
+				{
+					int j = i;
+					while (format[j] == ' ')
+						j++;
+					if (format[j] == 'd' || format[j] == 'i')
+					{
+						space = 1; i++;
+					}
+					else
+					{
+						done = 1; /* leave the space to be printed literally below */
+					}
+				}
+				else
+				{
+					done = 1;
+				}
 			}
 
 			if (format[i] == 'c')
