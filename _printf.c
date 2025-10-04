@@ -24,11 +24,12 @@ int _printf(const char *format, ...)
 			continue;
 		}
 
-		i++; /* skip '%' */
+		/* skip '%' */
+		i++;
 		if (format[i] == '\0')
 			return (va_end(ap), -1);
 
-		/* literal "% " when next non-space/flag is not d/i */
+		/* print "% " literally unless the final specifier is d/i */
 		if (format[i] == ' ')
 		{
 			int j = i;
@@ -38,12 +39,12 @@ int _printf(const char *format, ...)
 			{
 				count += _putchar('%');
 				count += _putchar(' ');
-				i++;            /* consume exactly one space */
-				continue;       /* keep parsing the rest (e.g. "% % % % ") */
+				i++; /* consume one space only */
+				continue;
 			}
 		}
 
-		/* parse flags: +, space, # */
+		/* parse flags: '+', ' ', '#' */
 		{
 			int plus = 0, space = 0, hash = 0;
 
