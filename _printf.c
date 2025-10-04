@@ -4,7 +4,6 @@
 /**
  * print_string - prints a string (handles NULL)
  * @s: string to print
- *
  * Return: number of characters printed
  */
 static int print_string(char *s)
@@ -24,7 +23,6 @@ static int print_string(char *s)
 /**
  * print_number - prints a signed decimal integer
  * @n: number to print
- *
  * Return: number of characters printed
  */
 static int print_number(int n)
@@ -61,39 +59,67 @@ static int print_number(int n)
 }
 
 /**
- * print_binary_rec - helper that prints bits high->low
- * @n: number to print
- *
- * Return: number of characters printed
- */
-static int print_binary_rec(unsigned int n)
-{
-	int count = 0;
-
-	if (n / 2)
-		count += print_binary_rec(n / 2);
-
-	count += _putchar((char)('0' + (n & 1)));
-	return (count);
-}
-
-/**
  * print_binary - prints an unsigned int as binary (base 2)
  * @n: number to print
- *
  * Return: number of characters printed
  */
 static int print_binary(unsigned int n)
 {
+	int count = 0, i = 0, k;
+	char buf[32];
+
 	if (n == 0)
 		return (_putchar('0'));
-	return (print_binary_rec(n));
+
+	while (n > 0)
+	{
+		buf[i++] = (char)('0' + (n & 1));
+		n >>= 1;
+	}
+	for (k = i - 1; k >= 0; k--)
+		count += _putchar(buf[k]);
+
+	return (count);
+}
+
+/**
+ * print_pointer - prints a pointer as 0x... lowercase; (nil) if NULL
+ * @ptr: pointer value
+ * Return: number of characters printed
+ */
+static int print_pointer(void *ptr)
+{
+	unsigned long n;
+	char buf[16];
+	int i = 0, k, count = 0;
+
+	if (ptr == NULL)
+		return (print_string("(nil)"));
+
+	n = (unsigned long)ptr;
+
+	count += _putchar('0');
+	count += _putchar('x');
+
+	if (n == 0)
+		return (count + _putchar('0'));
+
+	while (n > 0)
+	{
+		unsigned int d = (unsigned int)(n & 0xF);
+
+		buf[i++] = (char)(d < 10 ? ('0' + d) : ('a' + (d - 10)));
+		n >>= 4;
+	}
+	for (k = i - 1; k >= 0; k--)
+		count += _putchar(buf[k]);
+
+	return (count);
 }
 
 /**
  * _printf - produces output according to a format
  * @format: format string
- *
  * Return: number of characters printed, or -1 on error
  */
 int _printf(const char *format, ...)
@@ -121,6 +147,8 @@ int _printf(const char *format, ...)
 				count += print_number(va_arg(ap, int));
 			else if (format[i] == 'b')
 				count += print_binary(va_arg(ap, unsigned int));
+			else if (format[i] == 'p')
+				count += print_pointer(va_arg(ap, void *));
 			else if (format[i] == '%')
 				count += _putchar('%');
 			else
