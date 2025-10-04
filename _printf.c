@@ -1,127 +1,5 @@
 #include "main.h"
-#include <limits.h>
 
-/**
- * print_string - prints a string (handles NULL)
- * @s: string to print
- * Return: number of characters printed
- */
-static int print_string(char *s)
-{
-	int n = 0;
-
-	if (s == NULL)
-		s = "(null)";
-	while (*s)
-	{
-		n += _putchar(*s);
-		s++;
-	}
-	return (n);
-}
-
-/**
- * print_number - prints a signed decimal integer
- * @n: number to print
- * Return: number of characters printed
- */
-static int print_number(int n)
-{
-	int count = 0, i = 0, k, num = n;
-	char buf[12];
-
-	if (num == 0)
-		return (_putchar('0'));
-
-	if (num < 0)
-	{
-		count += _putchar('-');
-		if (num == INT_MIN)
-		{
-			count += _putchar('2');
-			num = 147483648;
-		}
-		else
-		{
-			num = -num;
-		}
-	}
-
-	while (num > 0)
-	{
-		buf[i++] = (char)('0' + (num % 10));
-		num /= 10;
-	}
-	for (k = i - 1; k >= 0; k--)
-		count += _putchar(buf[k]);
-
-	return (count);
-}
-
-/**
- * print_binary - prints an unsigned int as binary (base 2)
- * @n: number to print
- * Return: number of characters printed
- */
-static int print_binary(unsigned int n)
-{
-	int count = 0, i = 0, k;
-	char buf[32];
-
-	if (n == 0)
-		return (_putchar('0'));
-
-	while (n > 0)
-	{
-		buf[i++] = (char)('0' + (n & 1));
-		n >>= 1;
-	}
-	for (k = i - 1; k >= 0; k--)
-		count += _putchar(buf[k]);
-
-	return (count);
-}
-
-/**
- * print_pointer - prints a pointer as 0x... lowercase; (nil) if NULL
- * @ptr: pointer value
- * Return: number of characters printed
- */
-static int print_pointer(void *ptr)
-{
-	unsigned long n;
-	char buf[16];
-	int i = 0, k, count = 0;
-
-	if (ptr == NULL)
-		return (print_string("(nil)"));
-
-	n = (unsigned long)ptr;
-
-	count += _putchar('0');
-	count += _putchar('x');
-
-	if (n == 0)
-		return (count + _putchar('0'));
-
-	while (n > 0)
-	{
-		unsigned int d = (unsigned int)(n & 0xF);
-
-		buf[i++] = (char)(d < 10 ? ('0' + d) : ('a' + (d - 10)));
-		n >>= 4;
-	}
-	for (k = i - 1; k >= 0; k--)
-		count += _putchar(buf[k]);
-
-	return (count);
-}
-
-/**
- * _printf - produces output according to a format
- * @format: format string
- * Return: number of characters printed, or -1 on error
- */
 int _printf(const char *format, ...)
 {
 	va_list ap;
@@ -133,22 +11,60 @@ int _printf(const char *format, ...)
 	va_start(ap, format);
 	while (format[i] != '\0')
 	{
-		if (format[i] == '%')
+		if (format[i] != '%')
 		{
+			count += _putchar(format[i]);
 			i++;
-			if (format[i] == '\0')
-				return (va_end(ap), -1);
+			continue;
+		}
+
+		i++;
+		if (format[i] == '\0')
+			return (va_end(ap), -1);
+
+		/* flags */
+		{
+			int plus = 0, space = 0, hash = 0, done = 0;
+
+			while (!done)
+			{
+				if (format[i] == '+') { plus = 1; i++; }
+				else if (format[i] == ' ') { space = 1; i++; }
+				else if (format[i] == '#') { hash = 1; i++; }
+				else done = 1;
+			}
 
 			if (format[i] == 'c')
 				count += _putchar(va_arg(ap, int));
 			else if (format[i] == 's')
 				count += print_string(va_arg(ap, char *));
 			else if (format[i] == 'd' || format[i] == 'i')
-				count += print_number(va_arg(ap, int));
-			else if (format[i] == 'b')
-				count += print_binary(va_arg(ap, unsigned int));
+			{
+				int n = va_arg(ap, int);
+				if (n >= 0)
+				{
+					if (plus) count += _putchar('+');
+					else if (space) count += _putchar(' ');
+				}
+				count += print_number(n);
+			}
+			else if (format[i] == 'u')
+				count += print_unsigned(va_arg(ap, unsigned int));
+			else if (format[i] == 'o')
+			{
+				unsigned int u = va_arg(ap, unsigned int);
+				count += print_octal(u, hash && u != 0);
+			}
+			else if (format[i] == 'x' || format[i] == 'X')
+			{
+				unsigned int u = va_arg(ap, unsigned int);
+				int upper = (format[i] == 'X');
+				count += print_hex(u, upper, hash && u != 0);
+			}
 			else if (format[i] == 'p')
 				count += print_pointer(va_arg(ap, void *));
+			else if (format[i] == 'b')
+				count += print_binary(va_arg(ap, unsigned int));
 			else if (format[i] == '%')
 				count += _putchar('%');
 			else
@@ -156,10 +72,6 @@ int _printf(const char *format, ...)
 				count += _putchar('%');
 				count += _putchar(format[i]);
 			}
-		}
-		else
-		{
-			count += _putchar(format[i]);
 		}
 		i++;
 	}
