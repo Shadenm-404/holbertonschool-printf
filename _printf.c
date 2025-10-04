@@ -28,46 +28,35 @@ int _printf(const char *format, ...)
 		if (format[i] == '\0')
 			return (va_end(ap), -1);
 
-		/* parse flags: '+', ' ', '#' */
+		/* literal "% " when next non-space/flag is not d/i */
+		if (format[i] == ' ')
+		{
+			int j = i;
+			while (format[j] == ' ' || format[j] == '+' || format[j] == '#')
+				j++;
+			if (format[j] != 'd' && format[j] != 'i')
+			{
+				count += _putchar('%');
+				count += _putchar(' ');
+				i++;            /* consume exactly one space */
+				continue;       /* keep parsing the rest (e.g. "% % % % ") */
+			}
+		}
+
+		/* parse flags: +, space, # */
 		{
 			int plus = 0, space = 0, hash = 0;
-			int emitted_literal = 0;
 
 			while (format[i] == '+' || format[i] == ' ' || format[i] == '#')
 			{
 				if (format[i] == '+')
-				{
 					plus = 1;
-					i++;
-				}
+				else if (format[i] == ' ')
+					space = 1;
 				else if (format[i] == '#')
-				{
 					hash = 1;
-					i++;
-				}
-				else /* space */
-				{
-					int j = i;
-					while (format[j] == ' ' || format[j] == '+' || format[j] == '#')
-						j++;
-					if (format[j] == 'd' || format[j] == 'i')
-					{
-						space = 1;
-						i++;
-					}
-					else
-					{
-						count += _putchar('%');
-						count += _putchar(' ');
-						i++;
-						emitted_literal = 1;
-						break;
-					}
-				}
+				i++;
 			}
-
-			if (emitted_literal)
-				continue;
 
 			if (format[i] == '\0')
 				return (va_end(ap), -1);
