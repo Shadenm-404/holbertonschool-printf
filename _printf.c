@@ -1,10 +1,10 @@
-cat > _printf.c <<'EOF'
 #include "main.h"
 #include <limits.h>
 
 /**
  * print_string - prints a string (handles NULL)
  * @s: string to print
+ *
  * Return: number of characters printed
  */
 static int print_string(char *s)
@@ -24,6 +24,7 @@ static int print_string(char *s)
 /**
  * print_number - prints a signed decimal integer
  * @n: number to print
+ *
  * Return: number of characters printed
  */
 static int print_number(int n)
@@ -60,27 +61,33 @@ static int print_number(int n)
 }
 
 /**
+ * print_binary_rec - helper that prints bits high->low
+ * @n: number to print
+ *
+ * Return: number of characters printed
+ */
+static int print_binary_rec(unsigned int n)
+{
+	int count = 0;
+
+	if (n / 2)
+		count += print_binary_rec(n / 2);
+
+	count += _putchar((char)('0' + (n & 1)));
+	return (count);
+}
+
+/**
  * print_binary - prints an unsigned int as binary (base 2)
  * @n: number to print
+ *
  * Return: number of characters printed
  */
 static int print_binary(unsigned int n)
 {
-	int count = 0, i = 0, k;
-	char buf[32];
-
 	if (n == 0)
 		return (_putchar('0'));
-
-	while (n > 0)
-	{
-		buf[i++] = (char)('0' + (n & 1));
-		n >>= 1;
-	}
-	for (k = i - 1; k >= 0; k--)
-		count += _putchar(buf[k]);
-
-	return (count);
+	return (print_binary_rec(n));
 }
 
 /**
@@ -130,6 +137,4 @@ int _printf(const char *format, ...)
 	}
 	va_end(ap);
 	return (count);
-}
-EOF
 }
